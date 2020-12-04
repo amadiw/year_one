@@ -1,30 +1,32 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { Link, Route } from "react-router-dom"
+import SingleMovie from "./SingleMovie"
 
-export default function Search() {
+export default function Search(props) {
   const [searching, setSearching] = useState(false);
   const [message, setMessage] = useState(null);
   const [query, setQuery] = useState("");
-  const [movie, setMovie] = useState([]);
+  const [movie, setMovie] = useState([]); //change to plural movies/setMovies
 
-
+console.log('props', props)
   const searchMovies = async (evt) => {
 
     evt.preventDefault();
     setSearching(true);
     try {
-      const { data : results} = await axios.get(
+      const {data: {Search}} = await axios.get(
         `http://www.omdbapi.com/?apikey=4389c305&s=${query}`
       );
       setMessage(null);
-      setMovie(results.Search);
+      setMovie([...new Map(Search.map(item => [item.imdbID, item])).values()]); //removes duplicate Borat movie from API results
       setSearching(false);
     } catch (error) {
       setMessage("An unexpected error occured");
       setSearching(false);
     }
   };
-  console.log('movie------ ', movie)
+  console.table('movie------ ', movie)
 
   return (
     <div>
@@ -37,7 +39,10 @@ export default function Search() {
       <div>
         {movie.map(elem => (
           <div key={elem.imdbID}>
+          <Link to={`/movies/${elem.imdbID}` }>
           <div>{elem.Title}</div>
+          </Link>
+
           </div>
           )
       )}
